@@ -4,4 +4,4 @@ with open("Dataset/result.json") as f:
     data = f.read()
 js = json.loads(data)
 
-print(len(js))
+print(js.get("1").get("Height"))
