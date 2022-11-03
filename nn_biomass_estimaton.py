@@ -1,3 +1,4 @@
+#---------- Imports ----------
 import torch
 import cv2
 import numpy as np
@@ -6,7 +7,7 @@ from torchvision import transforms
 import os
 
 
-# Load Dataset
+#---------- Load Dataset ----------
 import glob
 image_list = []
 for filename in glob.glob('Images/*.png'): #assuming gif
@@ -18,9 +19,7 @@ for filename in glob.glob('Images/*.png'): #assuming gif
 # cv2.imshow("Test", image_list[0])
 # cv2.waitKey(0)
 
-
-
-# Load Model
+# #---------- Load Model ----------
 resnet_version = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152']
 model_RGB = torch.hub.load('pytorch/vision:v0.10.0', resnet_version[3], pretrained=True)
 model_D = torch.hub.load('pytorch/vision:v0.10.0', resnet_version[3], pretrained=True)
