@@ -8,15 +8,44 @@ import os
 import sequential_creator
 import glob
 from torchmetrics import MeanAbsolutePercentageError as MAPE
+import matplotlib as mpl
+import re
+import json
+from tqdm import tqdm
 
 #---------- Load Dataset ----------
-#DUMMY CODE PLS DELTE
-img_depht = Image.open("Dataset/RGB_1.png") #Image.open("Dataset/Debth_1.png")
-img_rgb = Image.open("Dataset/RGB_1.png")
+def load_all_images():
+    with open("Dataset/result.json") as f:
+        data = f.read()
+        rgb_list = []
+        depth_list = []
+        fresh_weight_list = []
+        dry_weight_list = []
+        for filename in tqdm(glob.glob('Dataset/Debth*.png')): #assuming gif
+            num = re.findall(r'\d+',filename )
+
+            img_depth = Image.open("Dataset/Debth_" + num[0] +".png") #Image.open("Dataset/Debth_1.png")
+            img_depth = (img_depth / np.linalg.norm(img_depth))*255
+            cm = mpl.cm.get_cmap('jet')
+            img_depth = cm(np.array(img_depth))
+            img_depth = Image.fromarray(np.uint8(img_depth[:,:,:3]*255))
+
+            img_rgb = Image.open("Dataset/RGB_" + num[0] +".png")
+            js = json.loads(data)
+
+            FreshWeight = js.get( num[0]).get("FreshWeightShoot")
+            DryWeight = js.get( num[0]).get("DryWeightShoot")
+
+            rgb_list.append(img_rgb)
+            depth_list.append(img_depth)
+            fresh_weight_list.append(FreshWeight)
+            dry_weight_list.append(DryWeight)
+    return rgb_list, depth_list, fresh_weight_list, dry_weight_list
+rgb_list, depth_list, fresh_weight_list, dry_weight_list = load_all_images()
 
 # #---------- Load ResNet Backbone (Pretrained Model) ----------
 resnet_version = ['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152']
-model_RGB = torch.hub.load('pytorch/vision:v0.10.0', resnet_version[3], pretrained=True)
+model_RGB = torch.hub.load('pytorch/vision:v0.10.0', resnet_version[3], weights="ResNet101_Weights.DEFAULT")
 #model_D = torch.hub.load('pytorch/vision:v0.10.0', resnet_version[3], pretrained=True)
 
 model_RGB.eval() # We don't want the resnet to update
@@ -27,7 +56,7 @@ model_RGB.eval() # We don't want the resnet to update
 #---------- Create Regression Head  ----------
 head_input_neurons = 2000
 head_hidden = [1000, 500, 250]
-head_output_neurons = 1
+head_output_neurons = 2
 head_activation = torch.nn.ReLU()
 regression_head = sequential_creator.make_model(input=head_input_neurons, hidden=head_hidden, output=head_output_neurons, activation=head_activation)
 
@@ -57,7 +86,7 @@ def resnet_depht(img):
 
 
 
-def train_step(rgb,depht):
+def train_step(rgb,depht,ground_truth):
 
     rgb_out = resnet_rgb(rgb)
     depht_out = resnet_depht(depht)
@@ -78,7 +107,7 @@ def train_step(rgb,depht):
     optimizer.step()
 
 
-train_step(img_rgb,img_depht)
+train_step(rgb_list[0], depth_list[0],torch.tensor(np.array([ fresh_weight_list[0], dry_weight_list[0]])))
     
 
 
