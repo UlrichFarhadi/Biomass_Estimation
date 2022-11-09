@@ -29,8 +29,11 @@ class LettuceDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        x_data = torch.tensor(self.data[idx]).float().unsqueeze(0)
-        y_label = torch.tensor(self.labels[idx])
+        x_1 = torch.tensor(np.array(self.data[idx][0])).float()
+        x_2 = torch.tensor(np.array(self.data[idx][1])).float()
+        x_data = [x_1, x_2]
+        #x_data = torch.tensor(self.data[idx]).float().unsqueeze(0)
+        y_label = torch.tensor(self.labels[idx]).float()
         return (x_data, y_label)
 
 
@@ -38,8 +41,8 @@ def data_splittage(dataset_size, percentage_train_validation_test):
     p_train = percentage_train_validation_test[0] / 100
     p_validation = percentage_train_validation_test[1] / 100
 
-    amt_train = dataset_size * p_train
-    amt_valid = dataset_size * p_validation
-    amt_test = dataset_size - amt_test - amt_valid
+    amt_train = int(dataset_size * p_train)
+    amt_valid = int(dataset_size * p_validation)
+    amt_test = dataset_size - amt_train - amt_valid
 
     return [amt_train, amt_valid, amt_test]

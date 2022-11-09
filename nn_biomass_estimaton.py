@@ -26,21 +26,23 @@ import lettuce_dataset
 batch_size = 16
 learning_rate = 1e-3
 
+#---------- Other parameters ----------
+augmented_dataset_size = 2000 # Size of the augmented dataset, so if the original dataset contained 103 images, they would be augmented and made into 2000 images
+                              # One thing to note is that if this number is much bigger than the size of the original dataset, then they would most likely end up being duplicates, since there is not that many augmentations implemented at the moment
+
 #---------- Load Lettuce Dataset ----------
 rgb_list, depth_list, fresh_weight_list, dry_weight_list = load_lettuce_dataset.load_all_images()
 
 #---------- Augment Lettuce Dataset ----------
-augmented_dataset_size = 2000
 depth_img_aug, rgb_imgs_aug, fresh_weight_GT, dry_weight_GT = data_augmentation.augment_data(rgb_images=rgb_list, depth_images=depth_list, fresh_weight_GT=fresh_weight_list, dry_weight_GT=dry_weight_list, amount_of_augmentated_images=augmented_dataset_size)
 
 #---------- Create data loaders ----------
 # Concatenate the depth and rgb images
-full_dataset 
-for i in range(augmented_dataset_size):
-
-
 full_dataset = []
 full_dataset_labels = []
+for i in range(augmented_dataset_size):
+    full_dataset.append([depth_img_aug[i], rgb_imgs_aug[i]])
+    full_dataset_labels.append([fresh_weight_GT[i], dry_weight_GT[i]])
 
 # Define the dataset
 dataset = lettuce_dataset.LettuceDataset(full_dataset, full_dataset_labels)
@@ -84,8 +86,8 @@ model = model_and_training_files.BiomassModel(regression_head=regression_head,
                                                 test_loader=test_loader,
                                                 lr=learning_rate)
 
-trainer = model_and_training_files.get_trainer()    # gets the trainer (which is a class that takes the model and dataset)
+trainer = model_and_training_files.get_trainer(max_epochs=1)    # gets the trainer (which is a class that takes the model and dataset)
 trainer.fit(model, train_dataloaders=train_loader, val_dataloaders=validation_loader, test_loaders=test_loader) # Train the model
 
 #---------- Save the weights ----------
-torch.save(model, "saved_models/best_weights_V1") # Saves the regression head
+torch.save(model, "saved_models/best_weights_V1.plk") # Saves the regression head

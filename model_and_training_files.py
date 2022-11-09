@@ -13,14 +13,16 @@ import re
 import json
 from tqdm import tqdm
 import pytorch_lightning as pl
+from pytorch_lightning import loggers as pl_loggers
+from pytorch_lightning.callbacks import EarlyStopping
 
 
 class BiomassModel(pl.LightningModule):
-    def __init__(self, regression_head, Resnet_RGB_and_depth, train_loader, validation_loader, test_loader, lr = 1e-3):
+    def __init__(self, regression_head, resnet_model_RGB_and_depth, lr = 1e-3):
         super().__init__()
         self.lr = lr
         self.layers = regression_head
-        self.Resnet = Resnet_RGB_and_depth
+        self.Resnet = resnet_model_RGB_and_depth
 
     def forward(self, x):  # (B, n_channels, h, w)
         return self.layers(x) # (B, n_pts, h, w)
@@ -29,8 +31,9 @@ class BiomassModel(pl.LightningModule):
         return torch.optim.NAdam(self.parameters(), lr=self.lr)
     
     def training_step(self, batch, _):
-        rgb_depth, weights = batch  # (B, h, w), (B, 2, 2xy), (B,)
+        depth_rgb, weights = batch  # weights fresh , dry
 
+        print(depth_rgb.shape)
         #split rgb_depth to rgb and depth
 
         rgb_out = self.resnet_rgb(rgb)
@@ -40,18 +43,54 @@ class BiomassModel(pl.LightningModule):
         pred = self.forward(reg_input)  # (B, n_pts, h, w)
         loss_fn = MAPE()
         loss = loss_fn(pred, weights)
+        self.log("train_loss", loss)
         return loss
-    #------------ Resnet --------------------
-    def resnet_rgb(self,img):
-        preprocess = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        ])
 
-        input_tensor = preprocess(img)
-        input_batch = input_tensor.unsqueeze(0) # create a mini-batch as expected by the model
+    def validation_step(self, batch, batch_idx):
+        depth_rgb, weights = batch  # weights fresh , dry
+
+        print(depth_rgb.shape)
+        #split rgb_depth to rgb and depth
+
+        rgb_out = self.resnet_rgb(rgb)
+        depth_out = self.resnet_depth(depth)
+
+        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 0), (-1,))
+        pred = self.forward(reg_input)  # (B, n_pts, h, w)
+        loss_fn = MAPE()
+        loss = loss_fn(pred, weights)
+        self.log("validation_loss", loss)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        depth_rgb, weights = batch  # weights fresh , dry
+
+        print(depth_rgb.shape)
+        #split rgb_depth to rgb and depth
+
+        rgb_out = self.resnet_rgb(rgb)
+        depth_out = self.resnet_depth(depth)
+
+        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 0), (-1,))
+        pred = self.forward(reg_input)  # (B, n_pts, h, w)
+        loss_fn = MAPE()
+        loss = loss_fn(pred, weights)
+        self.log("test_loss", loss)
+        return loss
+        
+
+    
+    #------------ Resnet --------------------
+    def resnet_rgb(self, img):
+        # preprocess = transforms.Compose([
+        # transforms.Resize(256),
+        # transforms.CenterCrop(224),
+        # transforms.ToTensor(),
+        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        # ])
+
+        # input_tensor = preprocess(img)
+        input_batch = img.unsqueeze(0) # create a mini-batch as expected by the model
         if torch.cuda.is_available():
             input_batch = input_batch.to('cuda')
             self.Resnet.to('cuda')
@@ -63,11 +102,14 @@ class BiomassModel(pl.LightningModule):
         
 
 def get_trainer(max_epochs=10):
-    loggerT = TensorBoardLogger("tb_logs", name="my_model")
+    loggerT = pl_loggers.TensorBoardLogger(save_dir="logs/", name="my_model")
+    early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=3, verbose=False, mode="max")
     return pl.Trainer(
-        gpus=[0], 
+        accelerator="auto", 
+        auto_select_gpus=True, 
         logger=loggerT,# enable_checkpointing=False,
         max_epochs=max_epochs,
+        callbacks=[early_stop_callback],
         #progress_bar_refresh_rate=0,
         #enable_model_summary=False,
     )
