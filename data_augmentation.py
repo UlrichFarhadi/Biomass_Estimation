@@ -64,7 +64,7 @@ def augment_data(rgb_images, depth_images, fresh_weight_GT, dry_weight_GT, amoun
         #t_topil(augmented_img).show()
         #cv2.waitKey(100)
         rgb_images_augmented.append(augmented_img)
-        depth_images_augmented.append(depth_images[img_idx])
+        depth_images_augmented.append(preprocess_to_resnet(depth_images[img_idx]))
         fresh_weight_GT_extended.append(fresh_weight_GT[img_idx])
         dry_weight_GT_extended.append(dry_weight_GT[img_idx])
     print("Amount of augmented images", len(rgb_images_augmented))

@@ -33,13 +33,20 @@ class BiomassModel(pl.LightningModule):
     def training_step(self, batch, _):
         depth_rgb, weights = batch  # weights fresh , dry
 
-        print(depth_rgb.shape)
+        depth = depth_rgb[0]
+        rgb = depth_rgb[1]
+        #testsphape = rgb.shape
+        #testsphape = depth.shape
         #split rgb_depth to rgb and depth
+        #depth = depth.permute(0, 3, 1, 2)
+        with torch.no_grad():
+            rgb_out = self.resnet_rgb(rgb)
+            depth_out = self.resnet_depth(depth)
 
-        rgb_out = self.resnet_rgb(rgb)
-        depth_out = self.resnet_depth(depth)
-
-        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 0), (-1,))
+        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 2), (weights.shape[0],-1))
+        #print(reg_input.shape)
+        #torch.squeeze(input)
+        #testsphape = reg_input.shape
         pred = self.forward(reg_input)  # (B, n_pts, h, w)
         loss_fn = MAPE()
         loss = loss_fn(pred, weights)
@@ -49,13 +56,17 @@ class BiomassModel(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         depth_rgb, weights = batch  # weights fresh , dry
 
-        print(depth_rgb.shape)
+        depth = depth_rgb[0]
+        rgb = depth_rgb[1]
+        #print(depth_rgb.shape)
         #split rgb_depth to rgb and depth
+        #depth = depth.permute(0, 3, 1, 2)
+        with torch.no_grad():
+            rgb_out = self.resnet_rgb(rgb)
+            depth_out = self.resnet_depth(depth)
 
-        rgb_out = self.resnet_rgb(rgb)
-        depth_out = self.resnet_depth(depth)
-
-        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 0), (-1,))
+        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 2), (weights.shape[0],-1))
+        
         pred = self.forward(reg_input)  # (B, n_pts, h, w)
         loss_fn = MAPE()
         loss = loss_fn(pred, weights)
@@ -65,13 +76,14 @@ class BiomassModel(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         depth_rgb, weights = batch  # weights fresh , dry
 
-        print(depth_rgb.shape)
+        depth = depth_rgb[0]
+        rgb = depth_rgb[1]
         #split rgb_depth to rgb and depth
+        with torch.no_grad():
+            rgb_out = self.resnet_rgb(rgb)
+            depth_out = self.resnet_depth(depth)
 
-        rgb_out = self.resnet_rgb(rgb)
-        depth_out = self.resnet_depth(depth)
-
-        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 0), (-1,))
+        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 2), (weights.shape[0],-1))
         pred = self.forward(reg_input)  # (B, n_pts, h, w)
         loss_fn = MAPE()
         loss = loss_fn(pred, weights)
@@ -90,7 +102,7 @@ class BiomassModel(pl.LightningModule):
         # ])
 
         # input_tensor = preprocess(img)
-        input_batch = img.unsqueeze(0) # create a mini-batch as expected by the model
+        input_batch = img  #.unsqueeze(0) # create a mini-batch as expected by the model
         if torch.cuda.is_available():
             input_batch = input_batch.to('cuda')
             self.Resnet.to('cuda')
