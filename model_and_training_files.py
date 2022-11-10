@@ -48,7 +48,7 @@ class BiomassModel(pl.LightningModule):
         #torch.squeeze(input)
         #testsphape = reg_input.shape
         pred = self.forward(reg_input)  # (B, n_pts, h, w)
-        loss_fn = MAPE()
+        loss_fn = MAPE().to(pred.device)
         loss = loss_fn(pred, weights)
         self.log("train_loss", loss)
         return loss
@@ -68,7 +68,7 @@ class BiomassModel(pl.LightningModule):
         reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 2), (weights.shape[0],-1))
         
         pred = self.forward(reg_input)  # (B, n_pts, h, w)
-        loss_fn = MAPE()
+        loss_fn = MAPE().to(pred.device)
         loss = loss_fn(pred, weights)
         self.log("validation_loss", loss)
         return loss
@@ -85,7 +85,7 @@ class BiomassModel(pl.LightningModule):
 
         reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 2), (weights.shape[0],-1))
         pred = self.forward(reg_input)  # (B, n_pts, h, w)
-        loss_fn = MAPE()
+        loss_fn = MAPE().to(pred.device)
         loss = loss_fn(pred, weights)
         self.log("test_loss", loss)
         return loss
@@ -113,14 +113,15 @@ class BiomassModel(pl.LightningModule):
         return self.Resnet(img)
         
 
-def get_trainer(max_epochs=10):
+def get_trainer():
+    epochs = 10
     loggerT = pl_loggers.TensorBoardLogger(save_dir="logs/", name="my_model")
     early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=3, verbose=False, mode="max")
     return pl.Trainer(
         accelerator="auto", 
         auto_select_gpus=True, 
         logger=loggerT,# enable_checkpointing=False,
-        max_epochs=max_epochs,
+        max_epochs=epochs,
         callbacks=[early_stop_callback],
         #progress_bar_refresh_rate=0,
         #enable_model_summary=False,
