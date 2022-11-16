@@ -24,6 +24,15 @@ class BiomassModel(pl.LightningModule):
         self.layers = regression_head
         self.Resnet = resnet_model_RGB_and_depth
 
+    def prediction(self, depth, rgb):
+        with torch.no_grad():
+            rgb_out = self.resnet_rgb(torch.unsqueeze(rgb, dim=0))
+            depth_out = self.resnet_depth(torch.unsqueeze(depth, dim=0))
+
+            reg_input = torch.reshape(torch.stack((depth_out, rgb_out), dim= 1), (1,-1))
+            pred = self.forward(reg_input)
+            return pred
+
     def forward(self, x):  # (B, n_channels, h, w)
         return self.layers(x) # (B, n_pts, h, w)
 
