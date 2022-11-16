@@ -14,6 +14,8 @@ def load_all_images():
         depth_list = []
         fresh_weight_list = []
         dry_weight_list = []
+        height_list = []
+        diameter_list = []
         for filename in tqdm(glob.glob('Dataset/Debth*.png')): #assuming gif
             num = re.findall(r'\d+',filename )
 
@@ -28,9 +30,13 @@ def load_all_images():
 
             FreshWeight = js.get( num[0]).get("FreshWeightShoot")
             DryWeight = js.get( num[0]).get("DryWeightShoot")
+            Height = js.get(num[0]).get("Height")
+            Diameter = js.get(num[0]).get("Diameter")
 
             rgb_list.append(img_rgb)
             depth_list.append(img_depth)
             fresh_weight_list.append(FreshWeight)
             dry_weight_list.append(DryWeight)
-    return rgb_list, depth_list, fresh_weight_list, dry_weight_list
+            height_list.append(Height)
+            diameter_list.append(Diameter)
+    return rgb_list, depth_list, fresh_weight_list, dry_weight_list #,height_list , diameter_list
