@@ -43,7 +43,7 @@ class BiomassModel(pl.LightningModule):
             rgb_out = self.resnet_rgb(rgb)
             depth_out = self.resnet_depth(depth)
 
-        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 2), (weights.shape[0],-1))
+        reg_input = torch.reshape(torch.stack(( depth_out,rgb_out), dim= 2), (weights.shape[0],-1))
         #print(reg_input.shape)
         #torch.squeeze(input)
         #testsphape = reg_input.shape
@@ -65,7 +65,7 @@ class BiomassModel(pl.LightningModule):
             rgb_out = self.resnet_rgb(rgb)
             depth_out = self.resnet_depth(depth)
 
-        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 2), (weights.shape[0],-1))
+        reg_input = torch.reshape(torch.stack(( depth_out,rgb_out), dim= 2), (weights.shape[0],-1))
         
         pred = self.forward(reg_input)  # (B, n_pts, h, w)
         loss_fn = MAPE().to(pred.device)
@@ -83,7 +83,7 @@ class BiomassModel(pl.LightningModule):
             rgb_out = self.resnet_rgb(rgb)
             depth_out = self.resnet_depth(depth)
 
-        reg_input = torch.reshape(torch.stack((rgb_out, depth_out), dim= 2), (weights.shape[0],-1))
+        reg_input = torch.reshape(torch.stack(( depth_out,rgb_out), dim= 2), (weights.shape[0],-1))
         pred = self.forward(reg_input)  # (B, n_pts, h, w)
         loss_fn = MAPE().to(pred.device)
         loss = loss_fn(pred, weights)
