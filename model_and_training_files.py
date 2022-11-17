@@ -22,6 +22,14 @@ class BiomassModel(pl.LightningModule):
         super().__init__()
         self.lr = lr
         self.layers = regression_head
+        ct = 0
+        for child in resnet_model_RGB_and_depth.children():
+            ct += 1
+            print(ct)
+            print(child)
+            if ct < 7:
+                for param in child.parameters():
+                    param.requires_grad = False
         self.Resnet = resnet_model_RGB_and_depth
 
     def prediction(self, depth, rgb):
@@ -51,9 +59,9 @@ class BiomassModel(pl.LightningModule):
         #testsphape = depth.shape
         #split rgb_depth to rgb and depth
         #depth = depth.permute(0, 3, 1, 2)
-        with torch.no_grad():
-            rgb_out = self.resnet_rgb(rgb)
-            depth_out = self.resnet_depth(depth)
+        #with torch.no_grad():
+        rgb_out = self.resnet_rgb(rgb)
+        depth_out = self.resnet_depth(depth)
 
         reg_input = torch.reshape(torch.stack(( depth_out,rgb_out), dim= 2), (weights.shape[0],-1))
         #print(reg_input.shape)
@@ -73,9 +81,9 @@ class BiomassModel(pl.LightningModule):
         #print(depth_rgb.shape)
         #split rgb_depth to rgb and depth
         #depth = depth.permute(0, 3, 1, 2)
-        with torch.no_grad():
-            rgb_out = self.resnet_rgb(rgb)
-            depth_out = self.resnet_depth(depth)
+        #with torch.no_grad():
+        rgb_out = self.resnet_rgb(rgb)
+        depth_out = self.resnet_depth(depth)
 
         reg_input = torch.reshape(torch.stack(( depth_out,rgb_out), dim= 2), (weights.shape[0],-1))
         
@@ -91,9 +99,9 @@ class BiomassModel(pl.LightningModule):
         depth = depth_rgb[0]
         rgb = depth_rgb[1]
         #split rgb_depth to rgb and depth
-        with torch.no_grad():
-            rgb_out = self.resnet_rgb(rgb)
-            depth_out = self.resnet_depth(depth)
+        #with torch.no_grad():
+        rgb_out = self.resnet_rgb(rgb)
+        depth_out = self.resnet_depth(depth)
 
         reg_input = torch.reshape(torch.stack(( depth_out,rgb_out), dim= 2), (weights.shape[0],-1))
         pred = self.forward(reg_input)  # (B, n_pts, h, w)
@@ -118,8 +126,8 @@ class BiomassModel(pl.LightningModule):
         # if torch.cuda.is_available():
         #     input_batch = input_batch.to('cuda')
         #     self.Resnet.to('cuda')
-        with torch.no_grad():
-            return self.Resnet(input_batch)
+        #with torch.no_grad():
+        return self.Resnet(input_batch)
 
     def resnet_depth(self,img):
         return self.Resnet(img)
@@ -128,7 +136,7 @@ class BiomassModel(pl.LightningModule):
 def get_trainer():
     epochs = 10
     loggerT = pl_loggers.TensorBoardLogger(save_dir="logs/", name="my_model")
-    early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=3, verbose=False, mode="max")
+    early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=6, verbose=False, mode="max")
     return pl.Trainer(
         accelerator="auto", 
         auto_select_gpus=True, 
