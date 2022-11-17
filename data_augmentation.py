@@ -58,8 +58,8 @@ def augment_data(rgb_images, depth_images, fresh_weight_GT, dry_weight_GT, amoun
     print("Augmenting RGB Images")
     for i in tqdm(range(amount_of_augmentated_images)):
         img_idx = i % amount_of_non_augmented_images
-        augmented_img = data_aug(rgb_images[img_idx])   # Apply data augmentations
-        #augmented_img = images[img_idx]
+        #augmented_img = data_aug(rgb_images[img_idx])   # Apply data augmentations
+        augmented_img = rgb_images[img_idx]
         augmented_img = preprocess_to_resnet(augmented_img) # Apply resnet augmentations
         #t_topil(augmented_img).show()
         #cv2.waitKey(100)
