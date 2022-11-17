@@ -18,111 +18,52 @@ from pytorch_lightning.callbacks import EarlyStopping
 
 
 class BiomassModel(pl.LightningModule):
-    def __init__(self, regression_head, resnet_model_RGB_and_depth, lr = 1e-3):
+    def __init__(self, CNNmodel, lr = 1e-3):
         super().__init__()
         self.lr = lr
-        self.layers = regression_head
-        self.Resnet = resnet_model_RGB_and_depth
+        self.model = CNNmodel
+        self.loss_func = MAPE()
 
     def prediction(self, depth, rgb):
-        #self.device = torch.device('cuda:0')
-        # print(depth.device)
-        # print(rgb.device)
-        with torch.no_grad():
-            rgb_out = self.resnet_rgb(torch.unsqueeze(rgb, dim=0,))
-            depth_out = self.resnet_depth(torch.unsqueeze(depth, dim=0))
+        print("Mangler at lave denne funktion")
+        pass
+        # #self.device = torch.device('cuda:0')
+        # # print(depth.device)
+        # # print(rgb.device)
+        # with torch.no_grad():
+        #     rgb_out = self.resnet_rgb(torch.unsqueeze(rgb, dim=0,))
+        #     depth_out = self.resnet_depth(torch.unsqueeze(depth, dim=0))
 
-            reg_input = torch.reshape(torch.stack((depth_out, rgb_out), dim= 1), (1,-1))
-            pred = self.forward(reg_input)
-            return pred
+        #     reg_input = torch.reshape(torch.stack((depth_out, rgb_out), dim= 1), (1,-1))
+        #     pred = self.forward(reg_input)
+        #     return pred
 
     def forward(self, x):  # (B, n_channels, h, w)
-        return self.layers(x) # (B, n_pts, h, w)
+        return self.model(x) # (B, n_pts, h, w)
 
     def configure_optimizers(self):
         return torch.optim.NAdam(self.parameters(), lr=self.lr)
     
     def training_step(self, batch, _):
-        depth_rgb, weights = batch  # weights fresh , dry
-
-        depth = depth_rgb[0]
-        rgb = depth_rgb[1]
-        #testsphape = rgb.shape
-        #testsphape = depth.shape
-        #split rgb_depth to rgb and depth
-        #depth = depth.permute(0, 3, 1, 2)
-        with torch.no_grad():
-            rgb_out = self.resnet_rgb(rgb)
-            depth_out = self.resnet_depth(depth)
-
-        reg_input = torch.reshape(torch.stack(( depth_out,rgb_out), dim= 2), (weights.shape[0],-1))
-        #print(reg_input.shape)
-        #torch.squeeze(input)
-        #testsphape = reg_input.shape
-        pred = self.forward(reg_input)  # (B, n_pts, h, w)
-        loss_fn = MAPE().to(pred.device)
-        loss = loss_fn(pred, weights)
+        img,weights = batch
+        pred = self.forward(img)
+        loss = self.loss_func(pred,weights)
         self.log("train_loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
-        depth_rgb, weights = batch  # weights fresh , dry
-
-        depth = depth_rgb[0]
-        rgb = depth_rgb[1]
-        #print(depth_rgb.shape)
-        #split rgb_depth to rgb and depth
-        #depth = depth.permute(0, 3, 1, 2)
-        with torch.no_grad():
-            rgb_out = self.resnet_rgb(rgb)
-            depth_out = self.resnet_depth(depth)
-
-        reg_input = torch.reshape(torch.stack(( depth_out,rgb_out), dim= 2), (weights.shape[0],-1))
-        
-        pred = self.forward(reg_input)  # (B, n_pts, h, w)
-        loss_fn = MAPE().to(pred.device)
-        loss = loss_fn(pred, weights)
+        img,weights = batch
+        pred = self.forward(img)
+        loss = self.loss_func(pred,weights)
         self.log("validation_loss", loss)
         return loss
 
     def test_step(self, batch, batch_idx):
-        depth_rgb, weights = batch  # weights fresh , dry
-
-        depth = depth_rgb[0]
-        rgb = depth_rgb[1]
-        #split rgb_depth to rgb and depth
-        with torch.no_grad():
-            rgb_out = self.resnet_rgb(rgb)
-            depth_out = self.resnet_depth(depth)
-
-        reg_input = torch.reshape(torch.stack(( depth_out,rgb_out), dim= 2), (weights.shape[0],-1))
-        pred = self.forward(reg_input)  # (B, n_pts, h, w)
-        loss_fn = MAPE().to(pred.device)
-        loss = loss_fn(pred, weights)
+        img,weights = batch
+        pred = self.forward(img)
+        loss = self.loss_func(pred,weights)
         self.log("test_loss", loss)
         return loss
-        
-
-    
-    #------------ Resnet --------------------
-    def resnet_rgb(self, img):
-        # preprocess = transforms.Compose([
-        # transforms.Resize(256),
-        # transforms.CenterCrop(224),
-        # transforms.ToTensor(),
-        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-        # ])
-
-        # input_tensor = preprocess(img)
-        input_batch = img  #.unsqueeze(0) # create a mini-batch as expected by the model
-        # if torch.cuda.is_available():
-        #     input_batch = input_batch.to('cuda')
-        #     self.Resnet.to('cuda')
-        with torch.no_grad():
-            return self.Resnet(input_batch)
-
-    def resnet_depth(self,img):
-        return self.Resnet(img)
         
 
 def get_trainer():
