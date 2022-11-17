@@ -25,8 +25,11 @@ class BiomassModel(pl.LightningModule):
         self.Resnet = resnet_model_RGB_and_depth
 
     def prediction(self, depth, rgb):
+        #self.device = torch.device('cuda:0')
+        # print(depth.device)
+        # print(rgb.device)
         with torch.no_grad():
-            rgb_out = self.resnet_rgb(torch.unsqueeze(rgb, dim=0))
+            rgb_out = self.resnet_rgb(torch.unsqueeze(rgb, dim=0,))
             depth_out = self.resnet_depth(torch.unsqueeze(depth, dim=0))
 
             reg_input = torch.reshape(torch.stack((depth_out, rgb_out), dim= 1), (1,-1))
@@ -112,9 +115,9 @@ class BiomassModel(pl.LightningModule):
 
         # input_tensor = preprocess(img)
         input_batch = img  #.unsqueeze(0) # create a mini-batch as expected by the model
-        if torch.cuda.is_available():
-            input_batch = input_batch.to('cuda')
-            self.Resnet.to('cuda')
+        # if torch.cuda.is_available():
+        #     input_batch = input_batch.to('cuda')
+        #     self.Resnet.to('cuda')
         with torch.no_grad():
             return self.Resnet(input_batch)
 
