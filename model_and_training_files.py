@@ -126,9 +126,9 @@ class BiomassModel(pl.LightningModule):
         
 
 def get_trainer():
-    epochs = 10
+    epochs = 50
     loggerT = pl_loggers.TensorBoardLogger(save_dir="logs/", name="my_model")
-    early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=3, verbose=False, mode="max")
+    early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=6, verbose=False, mode="max")
     return pl.Trainer(
         accelerator="auto", 
         auto_select_gpus=True, 
