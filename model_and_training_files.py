@@ -16,7 +16,6 @@ import pytorch_lightning as pl
 from pytorch_lightning import loggers as pl_loggers
 from pytorch_lightning.callbacks import EarlyStopping
 
-
 class BiomassModel(pl.LightningModule):
     def __init__(self, CNNmodel, lr = 1e-3):
         super().__init__()

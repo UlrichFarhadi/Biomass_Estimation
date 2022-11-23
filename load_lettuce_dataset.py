@@ -20,10 +20,10 @@ def load_all_images():
             num = re.findall(r'\d+',filename )
 
             img_depth = Image.open("Dataset/Debth_" + num[0] +".png") #Image.open("Dataset/Debth_1.png")
-            img_depth = (img_depth / np.linalg.norm(img_depth))*255
-            cm = mpl.cm.get_cmap('jet')
-            img_depth = cm(np.array(img_depth))
-            img_depth = Image.fromarray(np.uint8(img_depth[:,:,:3]*255))
+            # img_depth = (img_depth / np.linalg.norm(img_depth))*255
+            # cm = mpl.cm.get_cmap('jet')
+            # img_depth = cm(np.array(img_depth))
+            # img_depth = Image.fromarray(np.uint8(img_depth[:,:,:3]*255))
 
             img_rgb = Image.open("Dataset/RGB_" + num[0] +".png")
             js = json.loads(data)

@@ -49,6 +49,11 @@ def augment_data(rgb_images, depth_images, fresh_weight_GT, dry_weight_GT, amoun
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
 
+    preprocess_to_CNN = transforms.Compose([
+        transforms.Resize((640, 480)),
+        transforms.ToTensor(),
+    ])
+
     # Applying the augmentations
     rgb_images_augmented = []
     depth_images_augmented = []
@@ -64,14 +69,18 @@ def augment_data(rgb_images, depth_images, fresh_weight_GT, dry_weight_GT, amoun
         # Run without augmentations
         augmented_img = rgb_images[img_idx]
 
-        augmented_img = preprocess_to_resnet(augmented_img) # Apply resnet augmentations
+        #augmented_img = preprocess_to_resnet(augmented_img) # Apply resnet augmentations
+        #augmented_depth_img = preprocess_to_resnet(depth_images[img_idx])
+
+        augmented_depth_img = preprocess_to_CNN(depth_images[img_idx])
+        augmented_img = preprocess_to_CNN(augmented_img)
 
         # Show images
         #t_topil(augmented_img).show()
         #cv2.waitKey(100)
 
         rgb_images_augmented.append(augmented_img)
-        depth_images_augmented.append(preprocess_to_resnet(depth_images[img_idx]))
+        depth_images_augmented.append(augmented_depth_img)
         fresh_weight_GT_extended.append(fresh_weight_GT[img_idx])
         dry_weight_GT_extended.append(dry_weight_GT[img_idx])
     print("Amount of augmented images", len(rgb_images_augmented))

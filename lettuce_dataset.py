@@ -29,9 +29,10 @@ class LettuceDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        x_1 = torch.tensor(np.array(self.data[idx][0])).float()
-        x_2 = torch.tensor(np.array(self.data[idx][1])).float()
-        x_data = [x_1, x_2]
+        x_1 = torch.tensor(np.array(self.data[idx])).float()
+        #x_2 = torch.tensor(np.array(self.data[idx][1])).float()
+        #x_data = [x_1, x_2]
+        x_data = x_1
         #x_data = torch.tensor(self.data[idx]).float().unsqueeze(0)
         y_label = torch.tensor(self.labels[idx]).float()
         return (x_data, y_label)
