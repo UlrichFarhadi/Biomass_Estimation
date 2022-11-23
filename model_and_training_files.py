@@ -8,6 +8,7 @@ import os
 import sequential_creator
 import glob
 from torchmetrics import MeanAbsolutePercentageError as MAPE
+import torchmetrics
 import matplotlib as mpl
 import re
 import json
@@ -21,7 +22,7 @@ class BiomassModel(pl.LightningModule):
         super().__init__()
         self.lr = lr
         self.model = CNNmodel
-        self.loss_func = MAPE()
+        self.loss_func = torch.nn.MSELoss()
 
     def prediction(self, img):
         with torch.no_grad():
@@ -74,7 +75,7 @@ def get_trainer():
         auto_select_gpus=True, 
         logger=loggerT,# enable_checkpointing=False,
         max_epochs=epochs,
-        callbacks=[early_stop_callback],
+        #callbacks=[early_stop_callback],
         #progress_bar_refresh_rate=0,
         #enable_model_summary=False,
     )
