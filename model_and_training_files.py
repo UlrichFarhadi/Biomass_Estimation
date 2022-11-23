@@ -24,7 +24,8 @@ class BiomassModel(pl.LightningModule):
         self.loss_func = MAPE()
 
     def prediction(self, img):
-        return self.forward(img)
+        with torch.no_grad():
+            return self.forward(torch.unsqueeze(img, dim=0))
         # #self.device = torch.device('cuda:0')
         # # print(depth.device)
         # # print(rgb.device)
