@@ -23,9 +23,8 @@ class BiomassModel(pl.LightningModule):
         self.model = CNNmodel
         self.loss_func = MAPE()
 
-    def prediction(self, depth, rgb):
-        print("Mangler at lave denne funktion")
-        pass
+    def prediction(self, img):
+        return self.forward(img)
         # #self.device = torch.device('cuda:0')
         # # print(depth.device)
         # # print(rgb.device)
@@ -68,7 +67,7 @@ class BiomassModel(pl.LightningModule):
 def get_trainer():
     epochs = 50
     loggerT = pl_loggers.TensorBoardLogger(save_dir="logs/", name="my_model")
-    early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=6, verbose=False, mode="max")
+    early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=10, verbose=False, mode="max")
     return pl.Trainer(
         accelerator="auto", 
         auto_select_gpus=True, 
