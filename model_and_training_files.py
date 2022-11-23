@@ -17,12 +17,22 @@ import pytorch_lightning as pl
 from pytorch_lightning import loggers as pl_loggers
 from pytorch_lightning.callbacks import EarlyStopping
 
+class LogCoshLoss(torch.nn.Module):
+    def __init__(self):
+        super().__init__()
+
+    def forward(self, prediction, GT):
+        error = prediction - GT
+        return torch.mean(torch.log(torch.cosh(error + 1e-12)))
+
+
 class BiomassModel(pl.LightningModule):
     def __init__(self, CNNmodel, lr = 1e-3):
         super().__init__()
         self.lr = lr
         self.model = CNNmodel
-        self.loss_func = torch.nn.MSELoss()
+        #self.loss_func = torch.nn.MSELoss()
+        self.loss_func = LogCoshLoss()
 
     def prediction(self, img):
         with torch.no_grad():
