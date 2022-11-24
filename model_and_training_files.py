@@ -32,7 +32,7 @@ class BiomassModel(pl.LightningModule):
         self.lr = lr
         self.model = CNNmodel
         #self.loss_func = torch.nn.MSELoss()
-        self.loss_func = LogCoshLoss()
+        self.loss_func = torch.nn.MSELoss()
 
     def prediction(self, img):
         with torch.no_grad():
