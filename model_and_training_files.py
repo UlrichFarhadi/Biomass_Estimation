@@ -22,7 +22,8 @@ class LogCoshLoss(torch.nn.Module):
         super().__init__()
 
     def forward(self, prediction, GT):
-        error = prediction - GT
+        #error = ((torch.abs(prediction - GT))/GT) 
+        error = torch.abs(prediction - GT)
         return torch.mean(torch.log(torch.cosh(error + 1e-12)))
 
 
@@ -77,7 +78,7 @@ class BiomassModel(pl.LightningModule):
         
 
 def get_trainer():
-    epochs = 50
+    epochs = 40
     loggerT = pl_loggers.TensorBoardLogger(save_dir="logs/", name="my_model")
     early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=10, verbose=False, mode="max")
     return pl.Trainer(
