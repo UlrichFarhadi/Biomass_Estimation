@@ -24,7 +24,10 @@ class LogCoshLoss(torch.nn.Module):
     def forward(self, prediction, GT):
         #error = ((torch.abs(prediction - GT))/GT) 
         error = torch.abs(prediction - GT)
-        return torch.mean(torch.log(torch.cosh(error + 1e-12)))
+        temp = torch.cosh(error + 1e-12)
+        temp = torch.log(temp)
+        temp =  torch.mean(temp)
+        return temp
 
 
 class BiomassModel(pl.LightningModule):
@@ -32,8 +35,8 @@ class BiomassModel(pl.LightningModule):
         super().__init__()
         self.lr = lr
         self.model = CNNmodel
-        #self.loss_func = torch.nn.MSELoss()
-        self.loss_func = LogCoshLoss()
+        self.loss_func = torch.nn.MSELoss()
+        #self.loss_func = LogCoshLoss()
 
     def prediction(self, img):
         with torch.no_grad():
@@ -78,7 +81,7 @@ class BiomassModel(pl.LightningModule):
         
 
 def get_trainer():
-    epochs = 40
+    epochs = 50
     loggerT = pl_loggers.TensorBoardLogger(save_dir="logs/", name="my_model")
     early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=10, verbose=False, mode="max")
     return pl.Trainer(

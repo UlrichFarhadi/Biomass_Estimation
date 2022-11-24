@@ -39,4 +39,4 @@ def load_all_images():
             dry_weight_list.append(DryWeight)
             height_list.append(Height)
             diameter_list.append(Diameter)
-    return rgb_list, depth_list, fresh_weight_list, dry_weight_list #,height_list , diameter_list
+    return rgb_list, depth_list, fresh_weight_list, dry_weight_list ,height_list , diameter_list

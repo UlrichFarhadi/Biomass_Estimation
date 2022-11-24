@@ -24,7 +24,7 @@ from torch.utils.data import Dataset
 # # cv2.waitKey(0)
 
 #---------- Create data augmentation and also augmentations to convert to ResNET input format ----------
-def augment_data(rgb_images, depth_images, fresh_weight_GT, dry_weight_GT, amount_of_augmentated_images):
+def augment_data(rgb_images, depth_images, fresh_weight_GT, dry_weight_GT ,height_GT , diameter_GT, amount_of_augmentated_images):
     try:
         len(rgb_images) == len(depth_images)
     except:
@@ -59,6 +59,8 @@ def augment_data(rgb_images, depth_images, fresh_weight_GT, dry_weight_GT, amoun
     depth_images_augmented = []
     fresh_weight_GT_extended = []
     dry_weight_GT_extended = []
+    height_GT_extended = []
+    diameter_GT_extended = []
     t_topil = transforms.ToPILImage()
     print("Augmenting RGB Images")
     for i in tqdm(range(amount_of_augmentated_images)):
@@ -83,9 +85,11 @@ def augment_data(rgb_images, depth_images, fresh_weight_GT, dry_weight_GT, amoun
         depth_images_augmented.append(augmented_depth_img)
         fresh_weight_GT_extended.append(fresh_weight_GT[img_idx])
         dry_weight_GT_extended.append(dry_weight_GT[img_idx])
+        height_GT_extended.append(height_GT[img_idx])
+        diameter_GT_extended.append(diameter_GT[img_idx])
     print("Amount of augmented images", len(rgb_images_augmented))
 
-    return depth_images_augmented, rgb_images_augmented, fresh_weight_GT_extended, dry_weight_GT_extended
+    return depth_images_augmented, rgb_images_augmented, fresh_weight_GT_extended, dry_weight_GT_extended, height_GT_extended, diameter_GT_extended
 
 
 # print(processed_images[0].shape)
