@@ -57,16 +57,22 @@ def plot_full_dataset(model, dataset):
     # make the data
     x = np.array([])
     y = np.array([])
-    idx =  np.array([])
+    idex =  np.array([])
     error = np.array([])
     prct = np.array([])
     fresh = np.array([])
+    # s = [2, 3, 1, 4, 5, 3]
+    # sorted(range(len(s)), key=lambda k: s[k])
+    temp = []
     for i in range(len(dataset.dataset)):
-        pred = model.prediction(dataset.dataset[i][0])
-        true_val = dataset.dataset[i][1]
+        temp.append(dataset.dataset[i][1])
+    idx = sorted(range(len(temp)), key=lambda k: temp[k])
+    for i in range(len(dataset.dataset)):
+        pred = model.prediction(dataset.dataset[idx[i]][0])
+        true_val = dataset.dataset[idx[i]][1]
         x  = np.append(x, pred)
         y  = np.append(y, true_val)
-        idx = np.append(idx, i)
+        idex = np.append(idex, i)
         error= np.append(error,np.abs(pred-true_val))
         prct = np.append(prct,(np.abs(pred-true_val)/true_val)*100)
         #print(true_val.numpy()[0])
@@ -82,9 +88,9 @@ def plot_full_dataset(model, dataset):
     #         goal +=1
     
     #print(goal)
-    print("fresh weight mean = " , np.mean(error[:]))
-    print("fresh weight std = " , np.std(error[:]))
-    print("fresh weight var = " ,  np.var(error[:]))
+    print("diameter mean = " , np.mean(error[:]))
+    print("diameter std = " , np.std(error[:]))
+    print("diameter var = " ,  np.var(error[:]))
 
     # print("dry weight mean = " , np.mean(error[:,1]))
     # print("dry weight std = " , np.std(error[:,1]))
@@ -103,6 +109,8 @@ def plot_full_dataset(model, dataset):
 
     fig, ax = plt.subplots()
     #l = np.linspace(0, 500, 100)
+    print(x.shape)
+    print(y.shape)
     ax.plot(x, x, label='Expectation', color="black")
     ax.scatter(x, y) #, s=sizes, c=colors, vmin=0, vmax=100)
     ax.set_ylabel("Ground truth [g]")
@@ -113,7 +121,7 @@ def plot_full_dataset(model, dataset):
 
     fig, ax = plt.subplots()
     
-    ax.scatter(idx,error)
+    ax.scatter(idex,error)
     ax.set_ylabel("Error [g]")
     ax.set_xlabel("index ")
     ax.set_title("Plot")
@@ -123,7 +131,7 @@ def plot_full_dataset(model, dataset):
 
     fig, ax = plt.subplots()
     
-    ax.scatter(idx,prct)
+    ax.scatter(idex,prct)
     ax.set_ylabel("Error [%]")
     ax.set_xlabel("index ")
     ax.set_title("Plot")
