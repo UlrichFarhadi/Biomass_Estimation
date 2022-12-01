@@ -35,7 +35,8 @@ class BiomassModel(pl.LightningModule):
         super().__init__()
         self.lr = lr
         self.model = CNNmodel
-        self.loss_func = torch.nn.MSELoss()
+        self.loss_func = torch.nn.HuberLoss()
+        #self.loss_func = torch.nn.MSELoss()
         #self.loss_func = LogCoshLoss()
 
     def prediction(self, img):
@@ -83,13 +84,13 @@ class BiomassModel(pl.LightningModule):
 def get_trainer():
     epochs = 50
     loggerT = pl_loggers.TensorBoardLogger(save_dir="logs/", name="my_model")
-    early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=10, verbose=False, mode="max")
+    early_stop_callback = EarlyStopping(monitor="validation_loss", min_delta=0.00, patience=10, verbose=False, mode="min")
     return pl.Trainer(
         accelerator="auto", 
         auto_select_gpus=True, 
         logger=loggerT,# enable_checkpointing=False,
         max_epochs=epochs,
-        #callbacks=[early_stop_callback],
+        callbacks=[early_stop_callback],
         #progress_bar_refresh_rate=0,
         #enable_model_summary=False,
     )

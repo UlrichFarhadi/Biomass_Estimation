@@ -70,33 +70,33 @@ def plot_full_dataset(model, dataset):
         error= np.append(error,np.abs(pred-true_val))
         prct = np.append(prct,(np.abs(pred-true_val)/true_val)*100)
         #print(true_val.numpy()[0])
-        fresh = np.append(fresh,abs(pred.numpy()[0][0]-true_val.numpy()[0]))
+       # fresh = np.append(fresh,abs(pred.numpy()[0][0]-true_val.numpy()[0]))
     # plot
     #fresh_weight_GT[i], dry_weight_GT[i], height_GT[i], diameter_GT[i]
-    error = error.reshape(-1,4)
-    print(error.shape)
-    print(len(fresh))
-    goal = 0 
-    for i in range((len(fresh))):
-        if(error[i,0] == fresh[i]):
-            goal +=1
+    # error = error.reshape(-1,4)
+    # print(error.shape)
+    # print(len(fresh))
+    # goal = 0 
+    # for i in range((len(fresh))):
+    #     if(error[i,0] == fresh[i]):
+    #         goal +=1
     
-    print(goal)
-    print("fresh weight mean = " , np.mean(error[:,0]))
-    print("fresh weight std = " , np.std(error[:,0]))
-    print("fresh weight var = " ,  np.var(error[:,0]))
+    #print(goal)
+    print("fresh weight mean = " , np.mean(error[:]))
+    print("fresh weight std = " , np.std(error[:]))
+    print("fresh weight var = " ,  np.var(error[:]))
 
-    print("dry weight mean = " , np.mean(error[:,1]))
-    print("dry weight std = " , np.std(error[:,1]))
-    print("dry weight var = " ,  np.var(error[:,1]))
+    # print("dry weight mean = " , np.mean(error[:,1]))
+    # print("dry weight std = " , np.std(error[:,1]))
+    # print("dry weight var = " ,  np.var(error[:,1]))
 
-    print("height mean = " , np.mean(error[:,2]))
-    print("height std = " , np.std(error[:,2]))
-    print("height var = " ,  np.var(error[:,2]))
+    # print("height mean = " , np.mean(error[:,2]))
+    # print("height std = " , np.std(error[:,2]))
+    # print("height var = " ,  np.var(error[:,2]))
 
-    print("diameter mean = " , np.mean(error[:,3]))
-    print("diameter std = " , np.std(error[:,3]))
-    print("diameter var = " ,  np.var(error[:,3]))
+    # print("diameter mean = " , np.mean(error[:,3]))
+    # print("diameter std = " , np.std(error[:,3]))
+    # print("diameter var = " ,  np.var(error[:,3]))
 
 
 
