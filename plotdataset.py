@@ -91,7 +91,9 @@ def plot_full_dataset(model, dataset):
     print("diameter mean = " , np.mean(error[:]))
     print("diameter std = " , np.std(error[:]))
     print("diameter var = " ,  np.var(error[:]))
-
+    sd = np.mean(error[:])
+    div = np.sqrt(np.sum(np.square(y)))
+    print("diameter NRMSE = " ,  (np.sqrt(np.sum(np.square(error[:]/div)))))
     # print("dry weight mean = " , np.mean(error[:,1]))
     # print("dry weight std = " , np.std(error[:,1]))
     # print("dry weight var = " ,  np.var(error[:,1]))
@@ -121,7 +123,7 @@ def plot_full_dataset(model, dataset):
 
     fig, ax = plt.subplots()
     
-    ax.scatter(idex,error)
+    ax.scatter(y,error)
     ax.set_ylabel("Error [g]")
     ax.set_xlabel("index ")
     ax.set_title("Plot")
@@ -131,7 +133,7 @@ def plot_full_dataset(model, dataset):
 
     fig, ax = plt.subplots()
     
-    ax.scatter(idex,prct)
+    ax.scatter(y,prct)
     ax.set_ylabel("Error [%]")
     ax.set_xlabel("index ")
     ax.set_title("Plot")
