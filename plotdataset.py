@@ -89,7 +89,7 @@ def plot_full_dataset(model, dataset):
     #         goal +=1
     
     #print(goal)
-    var = "diameter"
+    var = "height"
     print(var , " mean = " , np.mean(error[:]))
     print(var ," std = " , np.std(error[:]))
     print(var, " var = " ,  np.var(error[:]))
@@ -98,7 +98,7 @@ def plot_full_dataset(model, dataset):
     print(var, " NRMSE = " ,  (np.sqrt(np.sum(np.square(error[:]/div)))))
 
     DFerror = pd.DataFrame(error[:])
-    DFerror.to_csv(var+"ererror.csv")
+    DFerror.to_csv(var+"error.csv")
 
     DFpred = pd.DataFrame(x[:])
     DFpred.to_csv(var+"pred.csv")
