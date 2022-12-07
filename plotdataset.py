@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 def plot_dataset(model, dataset):
@@ -88,12 +89,24 @@ def plot_full_dataset(model, dataset):
     #         goal +=1
     
     #print(goal)
-    print("diameter mean = " , np.mean(error[:]))
-    print("diameter std = " , np.std(error[:]))
-    print("diameter var = " ,  np.var(error[:]))
+    var = "diameter"
+    print(var , " mean = " , np.mean(error[:]))
+    print(var ," std = " , np.std(error[:]))
+    print(var, " var = " ,  np.var(error[:]))
     sd = np.mean(error[:])
     div = np.sqrt(np.sum(np.square(y)))
-    print("diameter NRMSE = " ,  (np.sqrt(np.sum(np.square(error[:]/div)))))
+    print(var, " NRMSE = " ,  (np.sqrt(np.sum(np.square(error[:]/div)))))
+
+    DFerror = pd.DataFrame(error[:])
+    DFerror.to_csv(var+"ererror.csv")
+
+    DFpred = pd.DataFrame(x[:])
+    DFpred.to_csv(var+"pred.csv")
+
+    DFtrue = pd.DataFrame(y[:])
+    DFtrue.to_csv(var+"true.csv")
+
+
     # print("dry weight mean = " , np.mean(error[:,1]))
     # print("dry weight std = " , np.std(error[:,1]))
     # print("dry weight var = " ,  np.var(error[:,1]))
