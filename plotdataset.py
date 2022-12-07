@@ -89,7 +89,7 @@ def plot_full_dataset(model, dataset):
     #         goal +=1
     
     #print(goal)
-    var = "height"
+    var = "fresh"
     print(var , " mean = " , np.mean(error[:]))
     print(var ," std = " , np.std(error[:]))
     print(var, " var = " ,  np.var(error[:]))
